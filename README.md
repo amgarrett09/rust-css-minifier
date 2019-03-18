@@ -11,7 +11,7 @@ make guarantees about not breaking styles, but I have tested the app on large
 files (like Materialize CSS) and it has worked so far.
 
 ## Usage
-```css-minifier <input path> <outputpath>```
+```css-minifier <input path> <output path>```
 
 ## Todo
 
