@@ -12,8 +12,3 @@ files (like Materialize CSS) and it has worked so far.
 
 ## Usage
 ```css-minifier <input path> <output path>```
-
-## Todo
-
-* Get minifier to remove comments
-* Add more minor minification techniques (like replacing 0.x decimals with .x)
