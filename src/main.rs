@@ -20,12 +20,8 @@ fn main() {
     let matches = App::new("css-minifier")
         .version(crate_version!())
         .author(crate_authors!())
-        .arg(Arg::with_name("input path")
-            .required(true)
-        )
-        .arg(Arg::with_name("output path")
-            .required(true)
-        )
+        .arg(Arg::with_name("input path").required(true))
+        .arg(Arg::with_name("output path").required(true))
         .get_matches();
 
     let i_path = matches.value_of("input path").unwrap();
@@ -95,7 +91,6 @@ fn main() {
     };
 }
 
-
 fn validate_filename(input: &str) -> bool {
     if let Some(caps) = FILE_TEMPLATE.captures(input) {
         if caps[1] == *input {
@@ -106,22 +101,42 @@ fn validate_filename(input: &str) -> bool {
     false
 }
 
+
+// Takes a string slice and returns a minified String. Admittedly, some
+// operations are cryptic. This is partly because of working with UTF-8,
+// partly to ensure we can minify the input in 0(n) time
 fn minify_css(input: &str) -> String {
     // Special chars where a space is unnecessary after them:
     let special_chars: Vec<char> = "{}:; \n".chars().collect();
     let mut last_char: Vec<char> = " ".chars().collect();
     let mut output: Vec<char> = Vec::new();
 
+    let mut comment = false;
+
     for ch in input.chars() {
-        // We shouldn't add a char to the output if:
+        // We're in a comment if we find '/*'
+        if ch == '\u{002a}' && last_char[0] == '\u{002F}' {
+            comment = true;
+            output.pop();
+        }
+
+        // We should NOT add a char to the output if:
         // 1) It's a line break, OR
-        // 2) The char is a space AND the last char scanned was one of our special cases
+        // 2) The char is a space AND the last char scanned was one of our
+        // special cases OR
+        // 3) We're inside a comment
         // should_add_char is the negation of that
-        let should_add_char =
-            !(ch == '\u{000a}' || (ch == '\u{0020}' && special_chars.contains(&last_char[0])));
+        let should_add_char = !(ch == '\u{000a}'
+            || (ch == '\u{0020}' && special_chars.contains(&last_char[0]))
+            || comment);
+        
+        // We're no longer in a comment if we find '*/'
+        if ch == '\u{002F}' && last_char[0] == '\u{002a}' {
+            comment = false;
+        }
 
         if should_add_char {
-            // Remove spaces in front of special chars (done this way to deal with edge cases)
+            // Effectively removes spaces in front of special chars
             if let Some(last) = output.pop() {
                 if !(special_chars.contains(&ch) && last == '\u{0020}') {
                     output.push(last);
@@ -137,7 +152,6 @@ fn minify_css(input: &str) -> String {
     output.iter().collect()
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::minify_css;
@@ -148,7 +162,7 @@ mod tests {
         let input = "/home/test/test.css";
         assert!(validate_filename(input));
 
-        let input="/test/test.txt";
+        let input = "/test/test.txt";
         assert!(!validate_filename(input));
     }
 
@@ -168,5 +182,13 @@ mod tests {
         let output = minify_css(input);
 
         assert_eq!(output, "@media (min-height:300px){test{color:red;}}");
+    }
+
+    #[test]
+    fn minify_comments() {
+        let input = ".test {\n    background-color: red;\n    /* some comment */\n}";
+        let output = minify_css(input);
+
+        assert_eq!(output, ".test{background-color:red;}");
     }
 }
