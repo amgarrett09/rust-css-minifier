@@ -13,7 +13,8 @@ In the future I'd like to add more minifications.
 
 The app minifies CSS in O(n) time and is quite fast. Although at this time 
 I don't make guarantees about not breaking styles, I have tested the app on large
-files (like Materialize CSS) and it has yet to break anything. If you decide
+files (like Materialize CSS) and it has yet to break anything. There could be
+some edge cases I haven't encountered though. If you decide
 to use this minifier, please let me know if you encounter problems.
 
 ## Usage
