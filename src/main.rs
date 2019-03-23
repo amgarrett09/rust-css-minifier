@@ -107,7 +107,7 @@ fn validate_filename(input: &str) -> bool {
 // partly to ensure we can minify the input in 0(n) time
 fn minify_css(input: &str) -> String {
     // Special chars where a space is unnecessary after them:
-    let special_chars: Vec<char> = "{}:; \n".chars().collect();
+    let special_chars: Vec<char> = "{}:; \n!".chars().collect();
     let mut last_char: Vec<char> = " ".chars().collect();
     let mut output: Vec<char> = Vec::new();
 
@@ -190,5 +190,13 @@ mod tests {
         let output = minify_css(input);
 
         assert_eq!(output, ".test{background-color:red;}");
+    }
+
+    #[test]
+    fn minify_bang() {
+        let input = ".hello {\n    background-color: red !important;\n}";
+        let output = minify_css(input);
+
+        assert_eq!(output, ".hello{background-color:red!important;}")
     }
 }
