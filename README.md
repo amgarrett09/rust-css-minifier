@@ -7,6 +7,7 @@ following:
 
 * Removes line breaks
 * Removes spaces that don't affect syntax
+* Removes semicolons before ending braces
 * Removes comments
 
 In the future I'd like to add more minifications.
