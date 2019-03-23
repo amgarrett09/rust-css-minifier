@@ -101,10 +101,9 @@ fn validate_filename(input: &str) -> bool {
     false
 }
 
-
-// Takes a string slice and returns a minified String. Admittedly, some
-// operations are cryptic. This is partly because of working with UTF-8,
-// partly to ensure we can minify the input in 0(n) time
+/* Takes a string slice and returns a minified String. Admittedly, some
+operations are cryptic. This is partly because of working with UTF-8,
+partly to ensure we can minify the input in 0(n) time */
 fn minify_css(input: &str) -> String {
     // Special chars where a space is unnecessary after them:
     let special_chars: Vec<char> = "{}:; \n!".chars().collect();
@@ -115,30 +114,33 @@ fn minify_css(input: &str) -> String {
 
     for ch in input.chars() {
         // We're in a comment if we find '/*'
-        if ch == '\u{002a}' && last_char[0] == '\u{002F}' {
+        if !comment && ch == '\u{002a}' && last_char[0] == '\u{002F}' {
             comment = true;
             output.pop();
         }
 
-        // We should NOT add a char to the output if:
-        // 1) It's a line break, OR
-        // 2) The char is a space AND the last char scanned was one of our
-        // special cases OR
-        // 3) We're inside a comment
-        // should_add_char is the negation of that
+        /* We should NOT add a char to the output if:
+        1) It's a line break, OR
+        2) The char is a space AND the last char scanned was one of our
+        special cases OR
+        3) We're inside a comment
+        should_add_char is the negation of that */
         let should_add_char = !(ch == '\u{000a}'
             || (ch == '\u{0020}' && special_chars.contains(&last_char[0]))
             || comment);
-        
+
         // We're no longer in a comment if we find '*/'
-        if ch == '\u{002F}' && last_char[0] == '\u{002a}' {
+        if comment && ch == '\u{002f}' && last_char[0] == '\u{002a}' {
             comment = false;
         }
 
         if should_add_char {
-            // Effectively removes spaces in front of special chars
             if let Some(last) = output.pop() {
-                if !(special_chars.contains(&ch) && last == '\u{0020}') {
+                // Remove spaces in front of special chars
+                if (!special_chars.contains(&ch) || last != '\u{0020}')
+                    // Remove semicolons in front of ending braces
+                    && (ch != '\u{007d}' || last != '\u{003b}')
+                {
                     output.push(last);
                 }
             }
@@ -172,7 +174,7 @@ mod tests {
                      color: blue;\n    flex: 1 0;}";
         let output = minify_css(input);
 
-        assert_eq!(output, "p{background-color:red;color:blue;flex:1 0;}");
+        assert_eq!(output, "p{background-color:red;color:blue;flex:1 0}");
     }
 
     #[test]
@@ -181,7 +183,7 @@ mod tests {
                      color: red;\n    }\n    }";
         let output = minify_css(input);
 
-        assert_eq!(output, "@media (min-height:300px){test{color:red;}}");
+        assert_eq!(output, "@media (min-height:300px){test{color:red}}");
     }
 
     #[test]
@@ -189,7 +191,7 @@ mod tests {
         let input = ".test {\n    background-color: red;\n    /* some comment */\n}";
         let output = minify_css(input);
 
-        assert_eq!(output, ".test{background-color:red;}");
+        assert_eq!(output, ".test{background-color:red}");
     }
 
     #[test]
@@ -197,6 +199,6 @@ mod tests {
         let input = ".hello {\n    background-color: red !important;\n}";
         let output = minify_css(input);
 
-        assert_eq!(output, ".hello{background-color:red!important;}")
+        assert_eq!(output, ".hello{background-color:red!important}")
     }
 }
