@@ -135,10 +135,10 @@ fn minify_css(input: &str) -> String {
         }
 
         if should_add_char {
+            /* Remove last char (and don't put it back) if it's a space before
+            a special character, or if it's a semicolon before an ending brace */
             if let Some(last) = output.pop() {
-                // Remove spaces in front of special chars
                 if (!special_chars.contains(&ch) || last != '\u{0020}')
-                    // Remove semicolons in front of ending braces
                     && (ch != '\u{007d}' || last != '\u{003b}')
                 {
                     output.push(last);
