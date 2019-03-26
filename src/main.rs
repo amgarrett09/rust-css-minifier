@@ -106,7 +106,7 @@ operations are cryptic. This is partly because of working with UTF-8,
 partly to ensure we can minify the input in 0(n) time */
 fn minify_css(input: &str) -> String {
     // Special chars where a space is unnecessary after them:
-    let special_chars: Vec<char> = "{}:; \n!".chars().collect();
+    let special_chars: Vec<char> = "{}:; \n!>".chars().collect();
     let mut last_char: Vec<char> = " ".chars().collect();
     let mut output: Vec<char> = Vec::new();
 
@@ -200,5 +200,13 @@ mod tests {
         let output = minify_css(input);
 
         assert_eq!(output, ".hello{background-color:red!important}")
+    }
+
+    #[test]
+    fn minify_direct_child() {
+        let input = ".hello > h1 {\n    color: green;\n}";
+        let output = minify_css(input);
+
+        assert_eq!(output, ".hello>h1{color:green}");
     }
 }
