@@ -39,7 +39,7 @@ specify an ouput folder with the -o option:
 The app will create minified .css files **with the same name as the input files,
 inside the specified output folder**.
 
-##Examples
+## Examples
 
 ### Minifying a single file
 
