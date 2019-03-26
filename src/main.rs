@@ -39,6 +39,7 @@ fn main() {
 
     let inputs = matches.values_of("file paths").unwrap();
 
+    // If the -m flag is set
     if matches.is_present("mult") {
         let o_folder = matches.value_of("output folder").unwrap();
 
@@ -59,6 +60,8 @@ fn main() {
         return;
     }
  
+    // Default path from here on
+    
     if inputs.len() > 2 {
         println!(
             "ERROR: Too many arguments.\nIf you need to minify multiple \
