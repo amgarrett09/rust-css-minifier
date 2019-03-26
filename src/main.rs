@@ -62,7 +62,7 @@ fn main() {
     if inputs.len() > 2 {
         println!(
             "ERROR: Too many arguments.\nIf you need to minify multiple \
-             files, use the -b flag."
+             files, use the -m flag."
         );
         return;
     }
