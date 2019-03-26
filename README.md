@@ -72,7 +72,7 @@ inside the `public/css` folder one level up.
 You don't need the equals sign after the -o option. You could have written:
 
 ```
-css-minifier -m -o ./minified ./test.css ./example.css ./foo.css
+css-minifier -m -o ../public/css test.css example.css foo.css
 ```
 
 and the app would do the same thing. This is a matter of personal preference.
