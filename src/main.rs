@@ -22,7 +22,7 @@ fn main() {
         .author(crate_authors!())
         .arg(Arg::with_name("file paths").multiple(true).required(true))
         .arg(
-            Arg::with_name("batch")
+            Arg::with_name("mult")
                 .short("m")
                 .long("multiple")
                 .help("Minify multiple files at once")
@@ -39,7 +39,7 @@ fn main() {
 
     let inputs = matches.values_of("file paths").unwrap();
 
-    if matches.is_present("batch") {
+    if matches.is_present("mult") {
         let o_folder = matches.value_of("output folder").unwrap();
 
         for item in inputs {
@@ -70,7 +70,7 @@ fn main() {
     let args: Vec<&str> = inputs.collect();
 
     if !validate_filename(args[0]) || !validate_filename(args[1]) {
-        println!("ERROR: Both input and output file must be .css files");
+        println!("ERROR: Both input and output files must be .css files");
         return;
     }
 
