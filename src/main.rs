@@ -20,75 +20,64 @@ fn main() {
     let matches = App::new("css-minifier")
         .version(crate_version!())
         .author(crate_authors!())
-        .arg(Arg::with_name("input path").required(true))
-        .arg(Arg::with_name("output path").required(true))
+        .arg(Arg::with_name("file paths").multiple(true).required(true))
+        .arg(
+            Arg::with_name("batch")
+                .short("m")
+                .long("multiple")
+                .help("Minify multiple files at once")
+                .requires("output folder"),
+        )
+        .arg(
+            Arg::with_name("output folder")
+                .short("o")
+                .long("out")
+                .help("Specifies the output folder to put minified files into")
+                .takes_value(true),
+        )
         .get_matches();
 
-    let i_path = matches.value_of("input path").unwrap();
-    let o_path = matches.value_of("output path").unwrap();
+    let inputs = matches.values_of("file paths").unwrap();
 
-    // Make sure user passed paths to css files
-    if !validate_filename(&i_path) || !validate_filename(&o_path) {
-        println!("ERROR: Both input and output need to be css files");
+    if matches.is_present("batch") {
+        let o_folder = matches.value_of("output folder").unwrap();
+
+        for item in inputs {
+            if !validate_filename(&item) {
+                println!("ERROR: Inputs need to be .css files");
+                return;
+            }
+
+            let i_path = Path::new(&item);
+            let file_name = i_path.file_name().unwrap();
+            let o_path = Path::new(&o_folder).join(file_name);
+
+            // Read input file, minify contents, and write to new file
+            create_new_file(&i_path, &o_path);
+        }
+
         return;
     }
-
-    // Open input file and read from it
-    let read_path = Path::new(&i_path);
-    let display = read_path.display();
-
-    let mut file = match File::open(&read_path) {
-        Err(reason) => {
-            println!(
-                "ERROR: Couldn't open file {}: {}",
-                display,
-                reason.description()
-            );
-            return;
-        }
-        Ok(file) => file,
-    };
-
-    let mut contents = String::new();
-    if let Err(reason) = file.read_to_string(&mut contents) {
+ 
+    if inputs.len() > 2 {
         println!(
-            "ERROR: Couldn't read contents of {}: {}",
-            display,
-            reason.description()
+            "ERROR: Too many arguments.\nIf you need to minify multiple \
+             files, use the -b flag."
         );
-
         return;
     }
 
-    // Minify
-    let minified = minify_css(&contents);
+    let args: Vec<&str> = inputs.collect();
 
-    // Create output file and write to it
-    let output_path = Path::new(&o_path);
-    let output_display = output_path.display();
+    if !validate_filename(args[0]) || !validate_filename(args[1]) {
+        println!("ERROR: Both input and output file must be .css files");
+        return;
+    }
 
-    let mut o_file = match File::create(&output_path) {
-        Err(reason) => {
-            println!(
-                "Couldn't create file {}: {}",
-                output_display,
-                reason.description()
-            );
-            return;
-        }
-        Ok(file) => file,
-    };
+    let i_path = Path::new(args[0]);
+    let o_path = Path::new(args[1]);
 
-    match o_file.write_all(minified.as_bytes()) {
-        Err(reason) => {
-            println!(
-                "Couldn't write to file {}: {}",
-                output_display,
-                reason.description()
-            );
-        }
-        Ok(_) => println!("Successfully created {}", output_display),
-    };
+    create_new_file(&i_path, &o_path);
 }
 
 fn validate_filename(input: &str) -> bool {
@@ -106,7 +95,7 @@ operations are cryptic. This is partly because of working with UTF-8,
 partly to ensure we can minify the input in 0(n) time */
 fn minify_css(input: &str) -> String {
     // Special chars where a space is unnecessary after them:
-    let special_chars: Vec<char> = "{}:; \n!>".chars().collect();
+    let special_chars: Vec<char> = "{}:; \n!>,".chars().collect();
     let mut last_char: Vec<char> = " ".chars().collect();
     let mut output: Vec<char> = Vec::new();
 
@@ -154,6 +143,65 @@ fn minify_css(input: &str) -> String {
     output.iter().collect()
 }
 
+// Reads an input file, minifies the contents, and writes to an output file
+fn create_new_file(i_path: &Path, o_path: &Path) {
+    let i_display = i_path.display();
+
+    // Open file
+    let mut file = match File::open(&i_path) {
+        Err(reason) => {
+            println!(
+                "ERROR: Couldn't open file {}: {}",
+                i_display,
+                reason.description()
+            );
+            return;
+        }
+        Ok(file) => file,
+    };
+
+    // Read contents to string
+    let mut content = String::new();
+    if let Err(reason) = file.read_to_string(&mut content) {
+        println!(
+            "ERROR: Couldn't write to file {}: {}",
+            i_display,
+            reason.description()
+        );
+        return;
+    }
+
+    // Minify
+    let minified = minify_css(&content);
+
+    let o_display = o_path.display();
+
+    // Create and write to output file
+    let mut o_file = match File::create(&o_path) {
+        Err(reason) => {
+            println!(
+                "ERROR: Couldn't create file {}: {}",
+                o_display,
+                reason.description()
+            );
+            return;
+        }
+        Ok(file) => file,
+    };
+
+    match o_file.write_all(minified.as_bytes()) {
+        Err(reason) => {
+            println!(
+                "ERROR: Couldn't write to file {}: {}",
+                o_display,
+                reason.description()
+            );
+            return;
+        }
+        Ok(_) => println!("Successfully created file {}", o_display),
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::minify_css;
@@ -171,7 +219,7 @@ mod tests {
     #[test]
     fn minify_basics() {
         let input = " \n\n  p {\n    background-color: red;\n    \
-                     color: blue;\n    flex: 1 0;}";
+                     color: blue;\n    flex: 1 0;\n}";
         let output = minify_css(input);
 
         assert_eq!(output, "p{background-color:red;color:blue;flex:1 0}");
