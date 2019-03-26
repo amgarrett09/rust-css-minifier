@@ -45,7 +45,7 @@ fn main() {
 
         for item in inputs {
             if !validate_filename(&item) {
-                println!("ERROR: Inputs need to be .css files");
+                eprintln!("Inputs need to be .css files");
                 return;
             }
 
@@ -63,8 +63,8 @@ fn main() {
     // Default path from here on
     
     if inputs.len() > 2 {
-        println!(
-            "ERROR: Too many arguments.\nIf you need to minify multiple \
+        eprintln!(
+            "Too many arguments.\nIf you need to minify multiple \
              files, use the -m flag."
         );
         return;
@@ -73,7 +73,7 @@ fn main() {
     let args: Vec<&str> = inputs.collect();
 
     if !validate_filename(args[0]) || !validate_filename(args[1]) {
-        println!("ERROR: Both input and output files must be .css files");
+        eprintln!("Both input and output files must be .css files");
         return;
     }
 
@@ -153,8 +153,8 @@ fn create_new_file(i_path: &Path, o_path: &Path) {
     // Open file
     let mut file = match File::open(&i_path) {
         Err(reason) => {
-            println!(
-                "ERROR: Couldn't open file {}: {}",
+            eprintln!(
+                "Couldn't open file {}: {}",
                 i_display,
                 reason.description()
             );
@@ -166,8 +166,8 @@ fn create_new_file(i_path: &Path, o_path: &Path) {
     // Read contents to string
     let mut content = String::new();
     if let Err(reason) = file.read_to_string(&mut content) {
-        println!(
-            "ERROR: Couldn't write to file {}: {}",
+        eprintln!(
+            "Couldn't write to file {}: {}",
             i_display,
             reason.description()
         );
@@ -182,8 +182,8 @@ fn create_new_file(i_path: &Path, o_path: &Path) {
     // Create and write to output file
     let mut o_file = match File::create(&o_path) {
         Err(reason) => {
-            println!(
-                "ERROR: Couldn't create file {}: {}",
+            eprintln!(
+                "Couldn't create file {}: {}",
                 o_display,
                 reason.description()
             );
@@ -194,8 +194,8 @@ fn create_new_file(i_path: &Path, o_path: &Path) {
 
     match o_file.write_all(minified.as_bytes()) {
         Err(reason) => {
-            println!(
-                "ERROR: Couldn't write to file {}: {}",
+            eprintln!(
+                "Couldn't write to file {}: {}",
                 o_display,
                 reason.description()
             );

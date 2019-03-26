@@ -44,7 +44,7 @@ inside the specified output folder**.
 ### Minifying a single file
 
 ```
-css-minifier ./example.css ./example-min.css
+css-minifier example.css example-min.css
 ```
 
 This will take example.css, and create a minified version in the same folder.
@@ -53,7 +53,7 @@ There's no requirement that it's in the same folder though, you can put the
 output anywhere, e.g.:
 
 ```
-css-minifier ./example.css ../public/css/example.css
+css-minifier example.css ../public/css/example.css
 ```
 
 This will take the imput file and create a minified version in the
@@ -62,12 +62,12 @@ This will take the imput file and create a minified version in the
 ### Minifying multiple files
 
 ```
-css-minifier -m -o=./minified ./test.css ./example.css ./foo.css
+css-minifier -m -o=../public/css test.css example.css foo.css
 ```
 
 This will take the three input files (test.css, example.css, and foo.css),
 and create three minified files (also named test.css, example.css, and foo.css)
-inside the `minified` folder.
+inside the `public/css` folder one level up.
 
 You don't need the equals sign after the -o option. You could have written:
 
