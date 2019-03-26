@@ -38,3 +38,41 @@ specify an ouput folder with the -o option:
 
 The app will create minified .css files **with the same name as the input files,
 inside the specified output folder**.
+
+##Examples
+
+### Minifying a single file
+
+```
+css-minifier ./example.css ./example-min.css
+```
+
+This will take example.css, and create a minified version in the same folder.
+
+There's no requirement that it's in the same folder though, you can put the
+output anywhere, e.g.:
+
+```
+css-minifier ./example.css ../public/css/example.css
+```
+
+This will take the imput file and create a minified version in the
+`./public/css` folder.
+
+### Minifying multiple files
+
+```
+css-minifier -m -o=./minified ./test.css ./example.css ./foo.css
+```
+
+This will take the three input files (test.css, example.css, and foo.css),
+and create three minified files (also named test.css, example.css, and foo.css)
+inside the `minified` folder.
+
+You don't need the equals sign after the -o option. You could have written:
+
+```
+css-minifier -m -o ./minified ./test.css ./example.css ./foo.css
+```
+
+and the app would do the same thing. This is a matter of personal preference.
