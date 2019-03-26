@@ -57,7 +57,7 @@ css-minifier ./example.css ../public/css/example.css
 ```
 
 This will take the imput file and create a minified version in the
-`./public/css` folder.
+`public/css` folder that's a level above the current directory.
 
 ### Minifying multiple files
 
