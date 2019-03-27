@@ -32,7 +32,7 @@ To minify a single .css file, the app takes two arguments, like so:
 ### For multiple files
 
 To minify multiple files at once, you need to set the -m flag, and also
-specify an ouput folder with the -o option:
+specify an output folder with the -o option:
 
 ```css-minifier -m -o=<output folder> <input file paths>...```
 
@@ -56,7 +56,7 @@ output anywhere, e.g.:
 css-minifier example.css ../public/css/example.css
 ```
 
-This will take the imput file and create a minified version in the
+This will take the input file and create a minified version in the
 `public/css` folder that's a level above the current directory.
 
 ### Minifying multiple files
