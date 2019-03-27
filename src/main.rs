@@ -87,9 +87,11 @@ fn main() {
     let inputs: Vec<&str> = match matches.values_of("file paths") {
         Some(paths) => paths.collect(),
         None => {
-            eprintln!("error: File paths expected but not supplied.\n If \
-            trying to get file paths from standard in, this only works with \
-            the -m flag.");
+            eprintln!(
+                "error: File paths expected but not supplied.\n If \
+                 trying to get file paths from standard in, this only works with \
+                 the -m flag."
+            );
             return;
         }
     };
@@ -97,8 +99,8 @@ fn main() {
     if inputs.len() != 2 {
         eprintln!(
             "error: Invalid arguments. You must supply an input path and an \
-            output path.\n If you need to minify multiple files, use the -m \
-            flag.\n For help, use the -h flag."
+             output path.\n If you need to minify multiple files, use the -m \
+             flag.\n For help, use the -h flag."
         );
         return;
     }
