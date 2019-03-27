@@ -87,7 +87,9 @@ fn main() {
     let inputs: Vec<&str> = match matches.values_of("file paths") {
         Some(paths) => paths.collect(),
         None => {
-            eprintln!("error: you need to supply file paths");
+            eprintln!("error: File paths expected but not supplied.\n If \
+            trying to get file paths from standard in, this only works with \
+            the -m flag.");
             return;
         }
     };
