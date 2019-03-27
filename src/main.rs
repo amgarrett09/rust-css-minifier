@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
+use std::io::{self, BufRead};
 use std::path::Path;
 
 #[macro_use]
@@ -20,7 +21,7 @@ fn main() {
     let matches = App::new("css-minifier")
         .version(crate_version!())
         .author(crate_authors!())
-        .arg(Arg::with_name("file paths").multiple(true).required(true))
+        .arg(Arg::with_name("file paths").multiple(true))
         .arg(
             Arg::with_name("mult")
                 .short("m")
@@ -33,17 +34,38 @@ fn main() {
                 .short("o")
                 .long("out")
                 .help("Specifies the output folder to put minified files into")
-                .takes_value(true),
+                .takes_value(true)
+                .requires("mult"),
         )
         .get_matches();
 
-    let inputs = matches.values_of("file paths").unwrap();
-
     // If the -m flag is set
     if matches.is_present("mult") {
+        let mut stdin_values: Vec<String> = Vec::new();
+        let mut inputs: Vec<&str> = Vec::new();
+
+        // If user didn't supply paths, get it from standard in
+        if matches.is_present("file paths") {
+            for val in matches.values_of("file paths").unwrap() {
+                inputs.push(val)
+            }
+        } else {
+            let stdin = io::stdin();
+
+            for line in stdin.lock().lines() {
+                let line = line.expect("Couldn't read line from stdin");
+                // Making sure data from line reads lives beyond this loop
+                stdin_values.push(line);
+            }
+
+            for val in stdin_values.iter() {
+                inputs.push(&val);
+            }
+        }
+
         let o_folder = matches.value_of("output folder").unwrap();
 
-        for item in inputs {
+        for item in inputs.iter() {
             if !validate_filename(&item) {
                 eprintln!("Inputs need to be .css files");
                 return;
@@ -59,26 +81,33 @@ fn main() {
 
         return;
     }
- 
+
     // Default path from here on
-    
-    if inputs.len() > 2 {
+
+    let inputs: Vec<&str> = match matches.values_of("file paths") {
+        Some(paths) => paths.collect(),
+        None => {
+            eprintln!("error: you need to supply file paths");
+            return;
+        }
+    };
+
+    if inputs.len() != 2 {
         eprintln!(
-            "Too many arguments.\nIf you need to minify multiple \
-             files, use the -m flag."
+            "error: Invalid arguments. You must supply an input path and an \
+            output path.\n If you need to minify multiple files, use the -m \
+            flag.\n For help, use the -h flag."
         );
         return;
     }
 
-    let args: Vec<&str> = inputs.collect();
-
-    if !validate_filename(args[0]) || !validate_filename(args[1]) {
+    if !validate_filename(inputs[0]) || !validate_filename(inputs[1]) {
         eprintln!("Both input and output files must be .css files");
         return;
     }
 
-    let i_path = Path::new(args[0]);
-    let o_path = Path::new(args[1]);
+    let i_path = Path::new(inputs[0]);
+    let o_path = Path::new(inputs[1]);
 
     create_new_file(&i_path, &o_path);
 }
@@ -153,11 +182,7 @@ fn create_new_file(i_path: &Path, o_path: &Path) {
     // Open file
     let mut file = match File::open(&i_path) {
         Err(reason) => {
-            eprintln!(
-                "Couldn't open file {}: {}",
-                i_display,
-                reason.description()
-            );
+            eprintln!("Couldn't open file {}: {}", i_display, reason.description());
             return;
         }
         Ok(file) => file,

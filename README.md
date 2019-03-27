@@ -20,7 +20,7 @@ to use this minifier, please let me know if you encounter problems.
 
 ## Usage
 ```
-css-minifier [FLAGS] [OPTIONS] <file paths>...
+css-minifier [FLAGS] [OPTIONS] [file paths]...
 ```
 
 ### For single files
@@ -76,3 +76,16 @@ css-minifier -m -o ../public/css test.css example.css foo.css
 ```
 
 and the app would do the same thing. This is a matter of personal preference.
+
+### Reading files from standard in
+
+When using the -m flag, you can pipe in a list of .css files to minify.
+
+```
+ls | awk '/.+\.css/' | css-minifier -m -o=minified
+```
+
+This lists all files in the current directory, then awk prints out
+only the ones that are .css files, and finally this list of .css files is piped
+to css-minifier. The app will minify the whole list, and put the minified
+versions in the `minified` folder.
