@@ -59,7 +59,16 @@ fn main() {
             }
 
             for val in stdin_values.iter() {
-                inputs.push(&val);
+                // Parse each line into params
+                let params = val.split(' ');
+
+                for param in params {
+                    match param {
+                        "" => continue,
+                        any => inputs.push(any)
+                    }
+                }
+
             }
         }
 
