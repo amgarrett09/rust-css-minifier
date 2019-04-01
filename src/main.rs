@@ -126,12 +126,12 @@ fn validate_filename(input: &str) -> bool {
     false
 }
 
-/* Takes a string slice and returns a minified String. Admittedly, some
-operations are cryptic. This is partly because of working with UTF-8,
-partly to ensure we can minify the input in 0(n) time */
+/* Takes a string slice and returns a minified String. Admittedly, not that
+straightforward, but implemented this way so that parsing is done in O(n)
+time.*/
 fn minify_css(input: &str) -> String {
     // Special chars where a space is unnecessary after them:
-    let special_chars: Vec<char> = "{}:; \n!>,".chars().collect();
+    let special_chars: [char; 8] = ['{', '}', ':', ';', ' ', '\n', '!', '>'];
     let mut last_char: Vec<char> = " ".chars().collect();
     let mut output: Vec<char> = Vec::new();
 
@@ -139,7 +139,7 @@ fn minify_css(input: &str) -> String {
 
     for ch in input.chars() {
         // We're in a comment if we find '/*'
-        if !comment && ch == '\u{002a}' && last_char[0] == '\u{002F}' {
+        if !comment && ch == '*' && last_char[0] == '/' {
             comment = true;
             output.pop();
         }
@@ -150,12 +150,12 @@ fn minify_css(input: &str) -> String {
         special cases OR
         3) We're inside a comment
         should_add_char is the negation of that */
-        let should_add_char = !(ch == '\u{000a}'
-            || (ch == '\u{0020}' && special_chars.contains(&last_char[0]))
+        let should_add_char = !(ch == '\n'
+            || (ch == ' ' && special_chars.contains(&last_char[0]))
             || comment);
 
         // We're no longer in a comment if we find '*/'
-        if comment && ch == '\u{002f}' && last_char[0] == '\u{002a}' {
+        if comment && ch == '/' && last_char[0] == '*' {
             comment = false;
         }
 
@@ -163,8 +163,8 @@ fn minify_css(input: &str) -> String {
             /* Remove last char (and don't put it back) if it's a space before
             a special character, or if it's a semicolon before an ending brace */
             if let Some(last) = output.pop() {
-                if (!special_chars.contains(&ch) || last != '\u{0020}')
-                    && (ch != '\u{007d}' || last != '\u{003b}')
+                if (!special_chars.contains(&ch) || last != ' ')
+                    && (ch != '}' || last != ';')
                 {
                     output.push(last);
                 }
