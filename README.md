@@ -2,8 +2,7 @@
 
 A simple command line tool which minifies CSS.
 
-This is a work in process and **is still very early**. Currently it does the
-following:
+Currently it does the following:
 
 * Removes line breaks
 * Removes spaces that don't affect syntax
@@ -12,11 +11,10 @@ following:
 
 In the future I'd like to add more minifications.
 
-The app minifies CSS in O(n) time and is quite fast. Although at this time 
-I don't make guarantees about not breaking styles, I have tested the app on large
-files (like Materialize CSS) and it has yet to break anything. There could be
-some edge cases I haven't encountered though. If you decide
-to use this minifier, please let me know if you encounter problems.
+The app minifies CSS in O(n) time and is quite fast, so it can be
+used to process large files, and also large numbers of files at once.
+
+If decide to use this tool and you encounter any bugs, feel free to open an issue or pull request.
 
 ## Usage
 ```
